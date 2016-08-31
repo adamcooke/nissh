@@ -1,0 +1,19 @@
+PATH
+  remote: .
+  specs:
+    nissh (1.0.0)
+      net-ssh (>= 2)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    net-ssh (3.2.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  nissh!
+
+BUNDLED WITH
+   1.10.6
