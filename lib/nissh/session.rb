@@ -74,7 +74,7 @@ module Nissh
       end
     rescue Timeout::Error => e
       response = Nissh::Response.new
-      response.exit_code -255
+      response.exit_code = -255
       response.stderr = "Command did not finish executing within the allowed #{timeout} seconds."
       response.command = command
       response
