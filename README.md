@@ -59,7 +59,7 @@ You do not need to add the `sudo` keyword before your command.
 session.execute!("cat /etc/passwd", :sudo => "yourpassword")
 
 # Alternative, you can provide it to the session and just pass true.
-ssh.sudo_password = "yourpassword"
+session.sudo_password = "yourpassword"
 session.execute!("cat /etc/passwd", :sudo => true)
 ```
 
