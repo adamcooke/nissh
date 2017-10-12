@@ -7,8 +7,11 @@ module Nissh
 
   class MockSession
 
+    attr_reader :executed_commands
+
     def initialize
       @mocked_commands = {}
+      @executed_commands = []
     end
 
     def command(matcher, &block)
@@ -56,6 +59,9 @@ module Nissh
       end
     end
 
+    def close
+    end
+
     private
 
     def match_command(commands)
@@ -64,6 +70,7 @@ module Nissh
 
       for matcher, mocked_command in @mocked_commands
         if (matcher.is_a?(Regexp) ? matcher =~ command : matcher == command)
+          @executed_commands << command
           return mocked_command
         end
       end

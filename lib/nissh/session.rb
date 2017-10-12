@@ -21,6 +21,10 @@ module Nissh
       end
     end
 
+    def close
+      @session.close rescue nil
+    end
+
     def execute!(commands, options = {})
       unless commands.is_a?(Array)
         commands = [commands]
