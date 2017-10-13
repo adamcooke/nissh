@@ -111,7 +111,7 @@ module Nissh
         success_code = 0
       end
 
-      result = execute!(command, options = {})
+      result = execute!(command, options)
       if result.exit_code == success_code
         result
       else
