@@ -12,6 +12,8 @@ module Nissh
     def initialize
       @mocked_commands = {}
       @executed_commands = []
+      @written_data = []
+      @closed = false
     end
 
     def command(matcher, &block)
@@ -75,9 +77,15 @@ module Nissh
     end
 
     def close
+      @closed = true
+    end
+
+    def closed?
+      @closed == true
     end
 
     def write_data(path, data)
+      @written_data << [path, data]
       data.bytesize
     end
 
