@@ -29,7 +29,12 @@ module Nissh
       return response
     end
 
-    def execute_with_timeout!(commands, timeout = 30)
+    def execute_with_timeout!(commands, timeout = 30, options = {})
+      if timeout.is_a?(Hash)
+        options = timeout
+        timeout = 30
+      end
+
       mocked_command = match_command(commands)
       if mocked_command.timeout?
         response = Response.new
@@ -41,7 +46,12 @@ module Nissh
       end
     end
 
-    def execute_with_success!(commands, success_code = 0)
+    def execute_with_success!(commands, success_code = 0, options = {})
+      if success_code.is_a?(Hash)
+        options = success_code
+        success_code = 0
+      end
+
       response = execute!(commands)
       if response.exit_code == success_code
         response
@@ -50,7 +60,12 @@ module Nissh
       end
     end
 
-    def execute_with_exception!(commands, success_code = 0)
+    def execute_with_exception!(commands, success_code = 0, options = {})
+      if success_code.is_a?(Hash)
+        options = success_code
+        success_code = 0
+      end
+
       response = execute!(commands)
       if response.exit_code == success_code
         response
