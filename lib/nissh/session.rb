@@ -1,3 +1,4 @@
+require 'timeout'
 require 'net/ssh'
 require 'nissh/response'
 
@@ -72,9 +73,14 @@ module Nissh
       response
     end
 
-    def execute_with_timeout!(command, timeout = 30)
+    def execute_with_timeout!(command, timeout = 30, options = {})
+      if timeout.is_a?(Hash)
+        options = timeout
+        timeout = 30
+      end
+
       Timeout.timeout(timeout) do
-        execute!(command)
+        execute!(command, options)
       end
     rescue Timeout::Error => e
       response = Nissh::Response.new
@@ -84,17 +90,27 @@ module Nissh
       response
     end
 
-    def execute_with_success!(command, success_code = 0)
-      result = execute!(command)
-      if result.success?
+    def execute_with_success!(command, success_code = 0, options = {})
+      if success_code.is_a?(Hash)
+        options = success_code
+        success_code = 0
+      end
+
+      result = execute!(command, options)
+      if result.exit_code == success_code
         result
       else
         false
       end
     end
 
-    def execute_with_exception!(command, success_code = 0)
-      result = execute!(command)
+    def execute_with_exception!(command, success_code = 0, options = {})
+      if success_code.is_a?(Hash)
+        options = success_code
+        success_code = 0
+      end
+
+      result = execute!(command, options = {})
       if result.exit_code == success_code
         result
       else
