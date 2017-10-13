@@ -21,11 +21,11 @@ module Nissh
     end
 
     def execute!(commands, options = {})
-      mocked_command = match_command(commands)
+      mocked_command, match_data = match_command(commands)
       response = Response.new
-      response.stdout = mocked_command.stdout || ""
-      response.stderr = mocked_command.stderr || ""
-      response.exit_code = mocked_command.exit_code || 0
+      response.stdout = evaluate(mocked_command.stdout || "", match_data)
+      response.stderr = evaluate(mocked_command.stderr || "", match_data)
+      response.exit_code = evaluate(mocked_command.exit_code || 0, match_data)
       return response
     end
 
@@ -35,7 +35,7 @@ module Nissh
         timeout = 30
       end
 
-      mocked_command = match_command(commands)
+      mocked_command, _ = match_command(commands)
       if mocked_command.timeout && mocked_command.timeout > timeout
         response = Response.new
         response.exit_code = -255
@@ -86,11 +86,19 @@ module Nissh
       for matcher, mocked_command in @mocked_commands
         if (matcher.is_a?(Regexp) ? matcher =~ command : matcher == command)
           @executed_commands << command
-          return mocked_command
+          return [mocked_command, $~]
         end
       end
 
       raise ExecutedUndefinedCommand, "Tried to run '#{command}' but was not defined in mock session"
+    end
+
+    def evaluate(block_or_value, matches)
+      if block_or_value.is_a?(Proc)
+        block_or_value.call(matches)
+      else
+        block_or_value
+      end
     end
 
   end

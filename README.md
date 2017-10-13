@@ -73,3 +73,29 @@ result = session.execute_with_timeout!("something-slow", 5)
 result.success?     # => false
 result.exit_code    # => -255
 ```
+
+## Usage in tests
+
+Nissh provides a mocked session which can be used when testing commands to external servers.
+You can pre-create a session object with the responses you wish to provide when
+commands are executed.
+
+```ruby
+mocked_session = Nissh::MockedSession.new
+
+# Specifies that whenever the hostname command is executed, it should return "myhostname"
+mocked_session.command "hostname" do |c|
+  c.stdout = "myhostname\n"
+end
+
+mocked_session.execute!("hostname").stdout    #=> "myhostname\n"
+
+# You can also use regex in the command name and provide blocks to execute rather than
+# literal values for stdout, stderr and exit_code.
+mocked_session.command /\Aapt install (\w+)" do |c|
+  c.stdout do |matches|
+    "Installed package #{matches[0]}"
+  end
+end
+```
+
