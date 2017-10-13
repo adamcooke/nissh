@@ -77,6 +77,10 @@ module Nissh
     def close
     end
 
+    def write_data(path, data)
+      data.bytesize
+    end
+
     private
 
     def match_command(commands)

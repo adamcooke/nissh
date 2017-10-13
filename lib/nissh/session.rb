@@ -1,5 +1,6 @@
 require 'timeout'
 require 'net/ssh'
+require 'net/sftp'
 require 'nissh/response'
 
 module Nissh
@@ -116,6 +117,10 @@ module Nissh
       else
         raise CommandExecutionFailed, result.output
       end
+    end
+
+    def write_data(path, data)
+      @session.sftp.file.open(path, 'w') { |f| f.write(data) }
     end
 
     private
