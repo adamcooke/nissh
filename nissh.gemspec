@@ -12,4 +12,5 @@ Gem::Specification.new do |s|
   s.email         = ["me@adamcooke.io"]
   s.licenses      = ['MIT']
   s.add_dependency "net-ssh", ">= 2"
+  s.add_dependency "net-sftp", ">= 2"
 end
