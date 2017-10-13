@@ -36,7 +36,7 @@ module Nissh
       end
 
       mocked_command = match_command(commands)
-      if mocked_command.timeout?
+      if mocked_command.timeout && mocked_command.timeout > timeout
         response = Response.new
         response.exit_code = -255
         response.stderr = "Command did not finish executing within the allowed #{timeout} seconds."

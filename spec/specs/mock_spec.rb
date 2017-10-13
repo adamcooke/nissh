@@ -42,7 +42,7 @@ describe Nissh::MockSession do
   context "execute_with_timeout!" do
     it "should return a timeout response" do
       session.command("hostname") do |c|
-        c.timeout!
+        c.timeout = 35
       end
       response = session.execute_with_timeout!("hostname", 10)
       expect(response.exit_code).to eq(-255)
@@ -51,6 +51,7 @@ describe Nissh::MockSession do
     it "should behave normally when no timeout is needed" do
       session.command("hostname") do |c|
         c.stdout = "blah\n"
+        c.timeout = 5
       end
       response = session.execute_with_timeout!("hostname", 10)
       expect(response.exit_code).to eq(0)
