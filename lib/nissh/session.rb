@@ -119,8 +119,14 @@ module Nissh
       end
     end
 
-    def write_data(path, data)
-      @session.sftp.file.open(path, 'w') { |f| f.write(data) }
+    def write_data(path, data, options = {})
+      if options[:sudo]
+        tmp_path = "/tmp/nissh-tmp-file-#{SecureRandom.uuid}"
+        self.write_data(tmp_path, data)
+        self.execute!("mv #{tmp_path} #{path}", :sudo => options[:sudo])
+      else
+        @session.sftp.file.open(path, 'w') { |f| f.write(data) }
+      end
     end
 
     private

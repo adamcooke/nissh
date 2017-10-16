@@ -84,7 +84,7 @@ module Nissh
       @closed == true
     end
 
-    def write_data(path, data)
+    def write_data(path, data, options = {})
       @written_data << [path, data]
       data.bytesize
     end
