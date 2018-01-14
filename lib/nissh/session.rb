@@ -2,9 +2,12 @@ require 'timeout'
 require 'net/ssh'
 require 'net/sftp'
 require 'nissh/response'
+require 'nissh/events'
 
 module Nissh
   class Session
+
+    include Nissh::Events
 
     class CommandExecutionFailed < StandardError; end
 
@@ -15,16 +18,21 @@ module Nissh
     attr_reader :session
     attr_accessor :sudo_password
 
-    def initialize(*args)
+    def initialize(*args, &block)
+      block.call(self) if block_given?
+      emit :before, :connect
       if args.first.is_a?(Net::SSH::Connection::Session)
         @session = args.first
       else
         @session = Net::SSH.start(*args)
       end
+      emit :after, :connect
     end
 
     def close
+      emit :before, :close
       @session.close rescue nil
+      emit :after, :close
     end
 
     def execute!(commands, options = {})
@@ -40,6 +48,7 @@ module Nissh
 
       command = commands.join(' && ')
       log :info, "\e[44;37m=> #{command}\e[0m"
+      emit :before, :execute, command, options
 
       response = Nissh::Response.new
       response.command = command
@@ -71,6 +80,7 @@ module Nissh
         end
       end
       channel.wait
+      emit :after, :execute, response
       response
     end
 
@@ -120,6 +130,7 @@ module Nissh
     end
 
     def write_data(path, data, options = {})
+      emit :before, :write_data, path, data, options
       if options[:sudo]
         tmp_path = "/tmp/nissh-tmp-file-#{SecureRandom.uuid}"
         self.write_data(tmp_path, data)
@@ -127,6 +138,8 @@ module Nissh
       else
         @session.sftp.file.open(path, 'w') { |f| f.write(data) }
       end
+      emit :after, :write_data, path, data, options
+      true
     end
 
     private

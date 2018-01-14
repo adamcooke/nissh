@@ -74,6 +74,29 @@ result.success?     # => false
 result.exit_code    # => -255
 ```
 
+## Events & Callbacks
+
+You can register events with any sessions which will be executed at appropriate
+times. You can register events with the session using the `will` and `did` method
+that are available.
+
+The following events are available:
+
+* `connect` - called before and after connection
+* `close` - called before and after the connection is closed
+* `execute` - called before and after a command is executed
+* `write_file` - called before and after a file is written
+
+```ruby
+session.will :execute do |command|
+  puts "About to execute '#{command}'"
+end
+
+session.did :execute do |response|
+  puts "Got #{response.exit_code} back from command."
+end
+```
+
 ## Usage in tests
 
 Nissh provides a mocked session which can be used when testing commands to external servers.
