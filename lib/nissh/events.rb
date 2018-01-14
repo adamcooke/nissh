@@ -10,7 +10,7 @@ module Nissh
     end
 
     def emit(type, action, *args)
-      if @callbacks[action] && @callbacks[action][type]
+      if @callbacks && @callbacks[action] && @callbacks[action][type]
         @callbacks[action][type].each do |callback|
           callback.call(*args)
         end
