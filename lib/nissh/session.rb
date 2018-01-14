@@ -17,6 +17,7 @@ module Nissh
 
     attr_reader :session
     attr_accessor :sudo_password
+    attr_writer :logger
 
     def initialize(*args, &block)
       block.call(self) if block_given?
@@ -145,13 +146,17 @@ module Nissh
     private
 
     def log(type, text, options = {})
-      if self.class.logger
+      if logger
         prefix = "\e[45;37m[#{@session.transport.host}]\e[0m"
         tabs = " " * (options[:tab] || 0)
         text.split(/\n/).each do |line|
-          self.class.logger.send(type,  prefix + tabs + line)
+          logger.send(type,  prefix + tabs + line)
         end
       end
+    end
+
+    def logger
+      @logger || self.class.logger
     end
 
   end

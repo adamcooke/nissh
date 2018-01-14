@@ -48,6 +48,13 @@ executed on. This is likely only required in development.
 Nissh::Session.logger = Logger.new("ssh.log")
 ```
 
+In addition to setting a global logger, you can also set a logger on a per
+session-basis
+
+```ruby
+session.logger = Logger.new(STDOUT)
+```
+
 ### Sudo Passwords
 
 If the user you are authenticating with needs to run a `sudo` command and provide
