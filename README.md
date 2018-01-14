@@ -104,6 +104,14 @@ session.did :execute do |response|
 end
 ```
 
+Events can also be registered to apply to all Nissh sessions if required
+
+```ruby
+Nissh::Session.did :execute do |response|
+  puts "Executed command!"
+end
+```
+
 ## Usage in tests
 
 Nissh provides a mocked session which can be used when testing commands to external servers.

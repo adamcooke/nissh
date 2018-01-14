@@ -13,6 +13,7 @@ module Nissh
 
     class << self
       attr_accessor :logger
+      include Nissh::Events
     end
 
     attr_reader :session
@@ -21,19 +22,19 @@ module Nissh
 
     def initialize(*args, &block)
       block.call(self) if block_given?
-      emit :before, :connect
-      if args.first.is_a?(Net::SSH::Connection::Session)
-        @session = args.first
-      else
-        @session = Net::SSH.start(*args)
+      _emit :connect do
+        if args.first.is_a?(Net::SSH::Connection::Session)
+          @session = args.first
+        else
+          @session = Net::SSH.start(*args)
+        end
       end
-      emit :after, :connect
     end
 
     def close
-      emit :before, :close
-      @session.close rescue nil
-      emit :after, :close
+      _emit :close do
+        @session.close rescue nil
+      end
     end
 
     def execute!(commands, options = {})
@@ -49,7 +50,9 @@ module Nissh
 
       command = commands.join(' && ')
       log :info, "\e[44;37m=> #{command}\e[0m"
+
       emit :before, :execute, command, options
+      self.class.emit :before, :execute, command, options
 
       response = Nissh::Response.new
       response.command = command
@@ -82,6 +85,7 @@ module Nissh
       end
       channel.wait
       emit :after, :execute, response
+      self.class.emit :after, :execute, response
       response
     end
 
@@ -131,16 +135,15 @@ module Nissh
     end
 
     def write_data(path, data, options = {})
-      emit :before, :write_data, path, data, options
-      if options[:sudo]
-        tmp_path = "/tmp/nissh-tmp-file-#{SecureRandom.uuid}"
-        self.write_data(tmp_path, data)
-        self.execute!("mv #{tmp_path} #{path}", :sudo => options[:sudo])
-      else
-        @session.sftp.file.open(path, 'w') { |f| f.write(data) }
+      _emit(:write_data, path, data, options) do
+        if options[:sudo]
+          tmp_path = "/tmp/nissh-tmp-file-#{SecureRandom.uuid}"
+          self.write_data(tmp_path, data)
+          self.execute!("mv #{tmp_path} #{path}", :sudo => options[:sudo])
+        else
+          @session.sftp.file.open(path, 'w') { |f| f.write(data) }
+        end
       end
-      emit :after, :write_data, path, data, options
-      true
     end
 
     private
@@ -157,6 +160,15 @@ module Nissh
 
     def logger
       @logger || self.class.logger
+    end
+
+    def _emit(action, *args, &block)
+      emit :before, action, *args
+      self.class.emit :before, action, *args
+      result = block.call
+      self.class.emit :after, action, *args
+      emit :after, action, *args
+      result
     end
 
   end
