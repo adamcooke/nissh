@@ -87,6 +87,10 @@ module Nissh
       emit :after, :execute, response
       self.class.emit :after, :execute, response
       response
+    ensure
+      # Attempt to close a channel if it is still running.
+      # If this fails, there's not much we can do about it.
+      channel.close rescue nil
     end
 
     def execute_with_timeout!(command, timeout = 30, options = {})
