@@ -136,7 +136,11 @@ module Nissh
         success_code = 0
       end
 
-      result = execute!(command, options)
+      if timeout = options.delete(:timeout)
+        result = execute_with_timeout!(command, timeout, options)
+      else
+        result = execute!(command, options)
+      end
       if result.exit_code == success_code
         result
       else
