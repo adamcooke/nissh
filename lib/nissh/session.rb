@@ -144,7 +144,7 @@ module Nissh
       if result.exit_code == success_code
         result
       else
-        raise CommandExecutionFailed, result.output
+        raise CommandExecutionFailed, "[exit:#{result.exit_code}] #{result.output}"
       end
     end
 

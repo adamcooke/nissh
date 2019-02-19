@@ -12,7 +12,7 @@ module Nissh
     end
 
     def output
-      "#{stdout}\n#{stderr}"
+      "#{stdout}\n#{stderr}".strip
     end
 
     def reset_output!
